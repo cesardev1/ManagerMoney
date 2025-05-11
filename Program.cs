@@ -1,7 +1,20 @@
+using ManagerMoney.Models;
+using ManagerMoney.Services;
+
 var builder = WebApplication.CreateBuilder(args);
+
+
+// Add secrets configuration
+var secrets = builder.Configuration.GetSection("Secrets").Get<SecretsOptions>() ?? new SecretsOptions();
+secrets.ConnectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING_DEFAULT") ?? secrets.ConnectionString;
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton(secrets);
+builder.Services.AddTransient<IAccountTypeRepository, AccountTypeRepository>();
+builder.Services.AddTransient<IUserServices, UserServices>();
+
 
 var app = builder.Build();
 
