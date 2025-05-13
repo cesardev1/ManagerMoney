@@ -1,3 +1,18 @@
 ﻿#reorder tr{
     cursor: move;
 }
+
+.total-container{
+    display: flex;
+    justify-content: space-around;
+    font-size: 26px;
+    text-align: center;
+}
+
+.active{
+    color: green;
+}
+
+.passive{
+    color: red;
+}
