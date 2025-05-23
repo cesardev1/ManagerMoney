@@ -1,0 +1,66 @@
+﻿@model TransactionUpdateViewModel
+
+@{
+    ViewData["Title"] = "Editar Transaccion";
+}
+
+
+<h1> Editar Transaccion </h1>
+<h5>Una transaccion te permite indicar tus ingresos y gastos</h5>
+<form asp-action="Edit">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="LastMount" />
+    <input type="hidden" asp-for="LastAccountId" />
+    <div class="mb-3">
+        <label asp-for="DateTransaction" class="form-label"></label>
+        <input asp-for="DateTransaction" class="form-control" />
+        <span asp-validation-for="DateTransaction" class="text-danger"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="AccountId" class="form-label"></label>
+        <select asp-for="AccountId" asp-items="Model.Accounts" class="form-select"></select>
+        <span asp-validation-for="AccountId" class="text-danger"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="OperationTypeId" class="form-label"></label>
+        <select asp-for="OperationTypeId" asp-items="Html.GetEnumSelectList<OperationType>()" class="form-select"></select>
+        <span asp-validation-for="OperationTypeId" class="text-danger"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label"></label>
+        <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select"></select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="Mount" class="form-label"></label>
+        <input asp-for="Mount" class="form-control" />
+        <span asp-validation-for="Mount" class="text-danger"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="Note" class="form-label"></label>
+        <textarea asp-for="Note" class="form-control" ></textarea>
+        <span asp-validation-for="Note" class="text-danger"></span>
+    </div>
+    
+    <button  class="btn btn-primary">Actualizar</button>
+    <button  class="btn btn-danger" asp-action="Delete">Borrar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/TransactionForm.js" asp-append-version="true"></script>
+    <script>
+        const urlCategories = '@Url.Action("GetCategories", "Transaction")';
+        $(function(){
+            initTransactionForm(urlCategories);
+        })
+       
+    </script>
+}

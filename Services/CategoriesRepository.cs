@@ -11,6 +11,7 @@ public interface ICategoriesRepository
     Task<Category> GetById(int id, int userId);
     Task Update(Category category);
     Task Delete(int id);
+    Task<IEnumerable<Category>> GetAll(int userId, OperationType operationType);
 }
 
 public class CategoriesRepository: ICategoriesRepository
@@ -28,6 +29,15 @@ public class CategoriesRepository: ICategoriesRepository
         return await connection.QueryAsync<Category>(@"SELECT *
                                                         FROM Categories
                                                         WHERE UserId = @UserId", new {userId});
+    }
+    
+    public async Task<IEnumerable<Category>> GetAll(int userId, OperationType operationType)
+    {
+        using var connection = new SqlConnection(_secretsOptions.ConnectionString);
+        return await connection.QueryAsync<Category>(@"SELECT *
+                                                        FROM Categories
+                                                        WHERE UserId = @UserId AND OperationTypeId = @operationType", 
+                                                  new {userId, operationType});
     }
     
     public async Task Create(Category category)
