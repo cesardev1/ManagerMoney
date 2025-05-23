@@ -41,7 +41,7 @@ public class TransactionController : Controller
 
         model.LastMount = model.Mount;
         
-        if (model.OperationTypeId == OperationType.Expense)
+        if (model.OperationTypeId == OperationType.Gasto)
             model.LastMount = model.Mount * -1;
         
         model.LastAccountId = transaction.AccountId;
@@ -86,7 +86,7 @@ public class TransactionController : Controller
             return RedirectToAction("Page404", "Home");
         
         var transaction = _mapper.Map<Transaction>(model);
-        if (model.OperationTypeId == OperationType.Expense)
+        if (model.OperationTypeId == OperationType.Gasto)
              transaction.Mount *= -1;
         
         await _transactionRepository.Update(transaction,model.LastMount,model.LastAccountId);
@@ -126,7 +126,7 @@ public class TransactionController : Controller
             return RedirectToAction("Page404", "Home");
         
         model.UserId = userId;
-        if (model.OperationTypeId == OperationType.Expense)
+        if (model.OperationTypeId == OperationType.Gasto)
             model.Mount *= -1;
         
         await _transactionRepository.Create(model);

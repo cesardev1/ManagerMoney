@@ -21,5 +21,5 @@ public class Transaction
     [Display(Name = "Cuenta")]
     public int AccountId { get; set; }
     [Display(Name = "Tipo de operacion")]
-    public OperationType OperationTypeId { get; set; } = OperationType.Income;
+    public OperationType OperationTypeId { get; set; } = OperationType.Ingreso;
 }
