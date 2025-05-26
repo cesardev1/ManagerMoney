@@ -11,6 +11,7 @@ public interface ITransactionRepository
     Task Update(Transaction transaction, decimal LastMount, int LastAccountId);
     Task Delete(int id);
     Task<IEnumerable<Transaction>> GetAllByAccountId(GetTransactionsByAccount model);
+    Task<IEnumerable<Transaction>> GetAllByUserId(TransactionByUserQueryParameters model);
 }
 
 public class TransactionRepository : ITransactionRepository
@@ -69,6 +70,19 @@ public class TransactionRepository : ITransactionRepository
                                                               ON a.Id = t.AccountId
                                                               WHERE t.AccountId = @AccountId AND t.UserId = @UserId
                                                               AND DateTransaction BETWEEN @StartDate AND @EndDate",model);
+    }
+    public async Task<IEnumerable<Transaction>> GetAllByUserId(TransactionByUserQueryParameters model)
+    {
+        using var connection = new SqlConnection(_secretOptions.ConnectionString);
+        return await connection.QueryAsync<Transaction>(@"SELECT t.Id,t.Mount,t.DateTransaction,c.Name as Category
+                                                              FROM [Transaction] t
+                                                              INNER JOIN Categories  c
+                                                              ON c.Id = t.CategoryId
+                                                              INNER JOIN Account  a
+                                                              ON a.Id = t.AccountId
+                                                              WHERE t.UserId = @UserId
+                                                              AND DateTransaction BETWEEN @StartDate AND @EndDate
+                                                              ORDER BY t.DateTransaction DESC",model);
     }
     public async Task<Transaction> GetById(int id, int userId)
     {
