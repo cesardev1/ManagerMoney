@@ -28,7 +28,7 @@ public class TransactionController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Edit(int id)
+    public async Task<IActionResult> Edit(int id,string urlReturn = null)
     {
         var userId = _userServices.GetUserId();
         
@@ -47,12 +47,12 @@ public class TransactionController : Controller
         model.LastAccountId = transaction.AccountId;
         model.Categories = await GetCategories(userId, transaction.OperationTypeId);
         model.Accounts = await GetAccounts(userId);
-        
+        model.UrlReturn = urlReturn;
         return View(model);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(int id,string urlReturn)
     {
         var userId = _userServices.GetUserId();
         var transaction = await _transactionRepository.GetById(id, userId);
@@ -61,7 +61,15 @@ public class TransactionController : Controller
             return RedirectToAction("Page404", "Home");
         
         await _transactionRepository.Delete(id);
-        return RedirectToAction("Index");
+        if (string.IsNullOrEmpty(urlReturn))
+        {
+            return RedirectToAction("Index");
+        }
+        else
+        {
+            return LocalRedirect(urlReturn);
+        }
+        
     }
 
     [HttpPost]
@@ -90,7 +98,15 @@ public class TransactionController : Controller
              transaction.Mount *= -1;
         
         await _transactionRepository.Update(transaction,model.LastMount,model.LastAccountId);
-        return RedirectToAction("Index");
+        if (string.IsNullOrEmpty(model.UrlReturn))
+        {
+            return RedirectToAction("Index");
+        }
+        else
+        {
+            return LocalRedirect(model.UrlReturn);
+        }
+        
     }
     public async Task<IActionResult> Create()
     {

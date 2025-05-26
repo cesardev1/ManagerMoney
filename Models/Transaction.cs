@@ -22,4 +22,6 @@ public class Transaction
     public int AccountId { get; set; }
     [Display(Name = "Tipo de operacion")]
     public OperationType OperationTypeId { get; set; } = OperationType.Ingreso;
+    public string Account { get; set; }
+    public string Category { get; set; }
 }
