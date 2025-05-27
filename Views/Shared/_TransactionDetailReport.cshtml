@@ -1,0 +1,75 @@
+﻿@model DetailedTransactionReport
+
+
+<h4>
+    <a asp-route-month="@ViewBag.LastMonth" asp-route-year="@ViewBag.LastYear" class="btn btn-secondary">
+        <i class="bi-chevron-left"></i>
+    </a>
+    @Model.StartDate.ToString("MMMM") @Model.StartDate.Year
+    <a asp-route-month="@ViewBag.NextMonth" asp-route-year="@ViewBag.NextYear" class="btn btn-secondary">
+        <i class="bi-chevron-right"></i>   
+    </a>
+</h4>
+
+<div class="total-container mb-3">
+    <div>
+        <div>
+            <strong>Depositos</strong>
+        </div>
+        <div class="asset">
+            @Model.TotalDeposit
+        </div>
+    </div>
+    <div>
+        <div>
+            <strong>Retiros</strong>
+        </div>
+        <div class="liability">
+            @Model.TotalWithdraw
+        </div>
+    </div>
+    <div>
+        <div>
+            <strong>Depositos</strong>
+        </div>
+        <div class="asset">
+            @Model.TotalBalance
+        </div>
+    </div>
+</div> 
+
+@if (Model.GroupedTransactions.Count() == 0)
+{
+    <h5>No hay datos para mostrar</h5>
+}
+else
+{
+    <table class="table table-striped">
+        <tbody>
+        @foreach (var groupedTransaction in Model.GroupedTransactions)
+        {
+            <tr style="background-color: lightblue; font-size: 26px;">
+                <td colspan="3">@groupedTransaction.TransactionDate.Day
+                    <span class="badge bg-secondary">@groupedTransaction.TransactionDate.ToString("ddd")</span>
+                </td>
+                <td class="asset">@groupedTransaction.DepositBalance.ToString("N")</td>
+                <td class="liability">@groupedTransaction.WithdrawBalance.ToString("N")</td>
+            </tr>
+            @foreach (var transaction in groupedTransaction.Transactions)
+            {
+                <tr style="Vertical-align: middle;">
+                    <td>
+                        <a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" asp-route-urlReturn="@ViewBag.urlReturn" class="btn btn-secondary btn-sm" >
+                            <i class="bi-pencil"></i>
+                        </a>
+                    </td>
+                    <td>@transaction.Category</td>
+                    <td>@transaction.Account</td>
+                    <td class="asset">@(transaction.OperationTypeId== OperationType.Ingreso? transaction.Mount.ToString("N") : null)</td>
+                    <td class="liability">@(transaction.OperationTypeId== OperationType.Gasto? transaction.Mount.ToString("N") : null)</td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+}

@@ -1,6 +1,8 @@
-﻿
+﻿@model DetailedTransactionReport
+
 @{
-    ViewData["title"] = "Transacciones";
+    ViewData["title"] = "Reporte Diario";
 }
 
-<h1>Indice de Transacciones</h1>
+<partial name="_TransactionDetailReport" model="Model"/>
+
