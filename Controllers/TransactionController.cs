@@ -13,18 +13,21 @@ public class TransactionController : Controller
     private readonly IAccountRepository _accountRepository;
     private readonly ICategoriesRepository _categoriesRepository;
     private readonly IMapper _mapper;
+    private readonly IReportService _reportService;
 
     public TransactionController(ITransactionRepository transactionRepository,
                                  IUserServices userServices,
                                  IAccountRepository accountRepository,
                                  ICategoriesRepository categoriesRepository,
-                                 IMapper mapper)
+                                 IMapper mapper,
+                                 IReportService reportService)
     {
         _transactionRepository = transactionRepository;
         _userServices = userServices;
         _accountRepository = accountRepository;
         _categoriesRepository = categoriesRepository;
         _mapper = mapper;
+        _reportService = reportService;
     }
 
     [HttpGet]
@@ -173,49 +176,7 @@ public class TransactionController : Controller
     {
         var userId = _userServices.GetUserId();
         
-        DateTime startDate;
-        DateTime endDate;
-
-        if (month <= 0 || month > 12 || year <= 1900)
-        {
-            var today = DateTime.Today;
-            startDate = new DateTime(today.Year, today.Month, 1);
-        }
-        else
-        {
-            startDate = new DateTime(year, month, 1);
-        }
-        endDate = startDate.AddMonths(1).AddDays(-1);
-
-        var parameter = new TransactionByUserQueryParameters()
-        {
-            UserId = userId,
-            StartDate = startDate,
-            EndDate = endDate
-        };
-
-        var transactions = await _transactionRepository.GetAllByUserId(parameter);
-        
-        var model = new DetailedTransactionReport();
-        
-        var transactionsPerDate = transactions.OrderByDescending(x => x.DateTransaction)
-            .GroupBy(x => x.DateTransaction)
-            .Select(group => new DetailedTransactionReport.TransactionPerDate()
-            {
-                TransactionDate = group.Key,
-                Transactions = group.AsEnumerable()
-            });
-        
-        model.GroupedTransactions = transactionsPerDate;
-        model.StartDate = startDate;
-        model.EndDate = endDate;
-        
-        ViewBag.LastMonth = startDate.AddMonths(-1).Month;
-        ViewBag.LastYear = startDate.AddMonths(-1).Year;
-        ViewBag.NextMonth = startDate.AddMonths(1).Month;
-        ViewBag.NextYear = startDate.AddMonths(1).Year;
-        ViewBag.urlReturn = HttpContext.Request.Path + HttpContext.Request.QueryString;
-        
+        var model = await _reportService.GetTransactionDetailReport(userId, month, year, ViewBag);
         
         return View(model);
     }

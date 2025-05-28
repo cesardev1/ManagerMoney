@@ -14,18 +14,21 @@ public class AccountController : Controller
     private readonly IAccountRepository _accountRepository;
     private readonly IMapper _mapper;
     private readonly ITransactionRepository _transactionRepository;
+    private readonly IReportService _reportService;
 
     public AccountController(IAccountTypeRepository accountTypeRepository, 
                             IUserServices userServices,
                             IAccountRepository accountRepository,
                             IMapper mapper,
-                            ITransactionRepository transactionRepository)
+                            ITransactionRepository transactionRepository,
+                            IReportService reportService)
     {
         _accountTypeRepository = accountTypeRepository;
         _userServices = userServices;
         _accountRepository = accountRepository;
         _mapper = mapper;
         _transactionRepository = transactionRepository;
+        _reportService = reportService;
     }
 
     public async Task<IActionResult> Index()
@@ -52,49 +55,8 @@ public class AccountController : Controller
         if (account is null)
             return RedirectToAction("Page404", "Home");
 
-        DateTime startDate;
-        DateTime endDate;
-
-        if (month <= 0 || month > 12 || year <= 1900)
-        {
-            var today = DateTime.Today;
-            startDate = new DateTime(today.Year, today.Month, 1);
-        }
-        else
-        {
-            startDate = new DateTime(year, month, 1);
-        }
-        endDate = startDate.AddMonths(1).AddDays(-1);
-
-        var getTransactionByAccount = new GetTransactionsByAccount()
-        {
-            AccountId = id,
-            UserId = userId,
-            StartDate = startDate,
-            EndDate = endDate
-        };
-        
-        var transactions = await _transactionRepository.GetAllByAccountId(getTransactionByAccount);
-        var model = new DetailedTransactionReport();
+        var model = await _reportService.GetTransactionReportPerAccount(userId, account.Id, month, year,ViewBag);
         ViewBag.Account = account.Name;
-
-        var transactionsPerDate = transactions.OrderByDescending(x => x.DateTransaction)
-            .GroupBy(x => x.DateTransaction)
-            .Select(group => new DetailedTransactionReport.TransactionPerDate()
-            {
-                TransactionDate = group.Key,
-                Transactions = group.AsEnumerable()
-            });
-        
-        model.GroupedTransactions = transactionsPerDate;
-        model.StartDate = startDate;
-        model.EndDate = endDate;
-        
-        ViewBag.LastMonth = startDate.AddMonths(-1).Month;
-        ViewBag.LastYear = startDate.AddMonths(-1).Year;
-        ViewBag.NextMonth = startDate.AddMonths(1).Month;
-        ViewBag.NextYear = startDate.AddMonths(1).Year;
-        ViewBag.urlReturn = HttpContext.Request.Path + HttpContext.Request.QueryString;
         
         return View(model);
     }
