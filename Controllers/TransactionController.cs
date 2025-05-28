@@ -171,6 +171,8 @@ public class TransactionController : Controller
         var categories = await GetCategories(userId, operationType);
         return Ok(categories); 
     }
+    
+    // Reports section: the "Index" refers to the daily report
 
     public async Task<IActionResult> Index(int month, int year)
     {
@@ -179,5 +181,22 @@ public class TransactionController : Controller
         var model = await _reportService.GetTransactionDetailReport(userId, month, year, ViewBag);
         
         return View(model);
+    }
+
+    public IActionResult WeeklyReport()
+    {
+        return View();
+    }
+    public IActionResult MonthlyReport()
+    {
+        return View();
+    }
+    public IActionResult ExcelReport()
+    {
+        return View();
+    }
+    public IActionResult Calendar()
+    {
+        return View();
     }
 }
