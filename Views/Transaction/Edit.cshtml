@@ -12,7 +12,7 @@
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="UrlReturn" />
-    <input type="hidden" asp-for="LastMount" />
+    <input type="hidden" asp-for="LastAmount" />
     <input type="hidden" asp-for="LastAccountId" />
     <div class="mb-3">
         <label asp-for="DateTransaction" class="form-label"></label>
@@ -39,9 +39,9 @@
     </div>
     
     <div class="mb-3">
-        <label asp-for="Mount" class="form-label"></label>
-        <input asp-for="Mount" class="form-control" />
-        <span asp-validation-for="Mount" class="text-danger"></span>
+        <label asp-for="Amount" class="form-label"></label>
+        <input asp-for="Amount" class="form-control" />
+        <span asp-validation-for="Amount" class="text-danger"></span>
     </div>
     
     <div class="mb-3">

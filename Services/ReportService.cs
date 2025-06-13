@@ -8,6 +8,7 @@ public interface IReportService
         int year, dynamic ViewBag);
 
     Task<DetailedTransactionReport> GetTransactionDetailReport(int userId, int month, int year, dynamic ViewBag);
+    Task<IEnumerable<WeeklyResultDto>> GetTransactionReportPerWeek(int userId, int month, int year,dynamic ViewBag);
 }
 
 public class ReportService : IReportService
@@ -34,6 +35,22 @@ public class ReportService : IReportService
         var transactions = await _transactionRepository.GetAllByUserId(parameter);
         var model = GenerateDetailedTransactionReport(transactions, startDate, endDate);
         SetViewBagForTransactionReport(ViewBag, startDate);
+        return model;
+    }
+
+    public async Task<IEnumerable<WeeklyResultDto>> GetTransactionReportPerWeek(int userId, int month, int year,dynamic ViewBag)
+    {
+        var (startDate, endDate) = GenerateStartAndEndDate(month, year);
+        
+        var parameter = new TransactionByUserQueryParameters()
+        {
+            UserId = userId,
+            StartDate = startDate,
+            EndDate = endDate
+        };
+        
+        SetViewBagForTransactionReport(ViewBag, startDate);
+        var model = await _transactionRepository.GetPerWeek(parameter);
         return model;
     }
     

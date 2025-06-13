@@ -8,10 +8,11 @@ public interface ITransactionRepository
 {
     Task Create(Transaction transaction);
     Task<Transaction> GetById(int id, int userId);
-    Task Update(Transaction transaction, decimal LastMount, int LastAccountId);
+    Task Update(Transaction transaction, decimal LastAmount, int LastAccountId);
     Task Delete(int id);
     Task<IEnumerable<Transaction>> GetAllByAccountId(GetTransactionsByAccount model);
     Task<IEnumerable<Transaction>> GetAllByUserId(TransactionByUserQueryParameters model);
+    Task<IEnumerable<WeeklyResultDto>> GetPerWeek(TransactionByUserQueryParameters model);
 }
 
 public class TransactionRepository : ITransactionRepository
@@ -32,7 +33,7 @@ public class TransactionRepository : ITransactionRepository
 
                 transaction.UserId,
                 transaction.DateTransaction,
-                transaction.Mount,
+                Amount = transaction.Amount,
                 transaction.CategoryId,
                 transaction.AccountId,
                 transaction.Note
@@ -41,28 +42,30 @@ public class TransactionRepository : ITransactionRepository
         transaction.Id = id;
     }
 
-    public async Task Update(Transaction transaction, decimal LastMount, int LastAccountId)
+    public async Task Update(Transaction transaction, decimal LastAmount, int LastAccountId)
     {
         using var connection = new SqlConnection(_secretOptions.ConnectionString);
         await connection.ExecuteAsync("Transaction_Update", new
             {
                 transaction.Id,
                 transaction.DateTransaction,
-                transaction.Mount,
+                Mount = transaction.Amount,
                 transaction.CategoryId,
                 transaction.AccountId,
                 transaction.Note,
-                LastMount,
+                LastAmount,
                 LastAccountId,
             },
             commandType: System.Data.CommandType.StoredProcedure
         );
     }
+    
+    
 
     public async Task<IEnumerable<Transaction>> GetAllByAccountId(GetTransactionsByAccount model)
     {
         using var connection = new SqlConnection(_secretOptions.ConnectionString);
-        return await connection.QueryAsync<Transaction>(@"SELECT t.Id,t.Mount,t.DateTransaction,c.Name as Category
+        return await connection.QueryAsync<Transaction>(@"SELECT t.Id,t.Amount,t.DateTransaction,c.Name as Category
                                                               FROM [Transaction] t
                                                               INNER JOIN Categories  c
                                                               ON c.Id = t.CategoryId
@@ -71,10 +74,23 @@ public class TransactionRepository : ITransactionRepository
                                                               WHERE t.AccountId = @AccountId AND t.UserId = @UserId
                                                               AND DateTransaction BETWEEN @StartDate AND @EndDate",model);
     }
+
+    public async Task<IEnumerable<WeeklyResultDto>> GetPerWeek(TransactionByUserQueryParameters model)
+    {
+        using var connection = new SqlConnection(_secretOptions.ConnectionString);
+        return await connection.QueryAsync<WeeklyResultDto>(@"SELECT DATEDIFF(d, @StartDate, DateTransaction)/7+1 as Week, SUM(Amount) as Amount, cat.OperationTypeId
+                                                                FROM [ManejoPresupuesto].[dbo].[Transaction]
+                                                                INNER JOIN [Categories] cat
+                                                                ON cat.Id = [Transaction].CategoryId
+                                                                WHERE [Transaction].UserId = @UserId AND
+                                                                DateTransaction BETWEEN @StartDate AND @EndDate
+                                                                Group By DATEDIFF(d, @StartDate, DateTransaction)/7, cat.OperationTypeId"
+                                                                ,model);
+    }
     public async Task<IEnumerable<Transaction>> GetAllByUserId(TransactionByUserQueryParameters model)
     {
         using var connection = new SqlConnection(_secretOptions.ConnectionString);
-        return await connection.QueryAsync<Transaction>(@"SELECT t.Id,t.Mount,t.DateTransaction,c.Name as Category
+        return await connection.QueryAsync<Transaction>(@"SELECT t.Id,t.Amount,t.DateTransaction,c.Name as Category, a.Name as Account, c.OperationTypeId, Note
                                                               FROM [Transaction] t
                                                               INNER JOIN Categories  c
                                                               ON c.Id = t.CategoryId

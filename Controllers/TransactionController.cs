@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Runtime.InteropServices.JavaScript;
+using AutoMapper;
 using ManagerMoney.Models;
 using ManagerMoney.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -42,10 +43,10 @@ public class TransactionController : Controller
         
         var model = _mapper.Map<TransactionUpdateViewModel>(transaction);
 
-        model.LastMount = model.Mount;
+        model.LastAmount = model.Amount;
         
         if (model.OperationTypeId == OperationType.Gasto)
-            model.LastMount = model.Mount * -1;
+            model.LastAmount = model.Amount * -1;
         
         model.LastAccountId = transaction.AccountId;
         model.Categories = await GetCategories(userId, transaction.OperationTypeId);
@@ -98,9 +99,9 @@ public class TransactionController : Controller
         
         var transaction = _mapper.Map<Transaction>(model);
         if (model.OperationTypeId == OperationType.Gasto)
-             transaction.Mount *= -1;
+             transaction.Amount *= -1;
         
-        await _transactionRepository.Update(transaction,model.LastMount,model.LastAccountId);
+        await _transactionRepository.Update(transaction,model.LastAmount,model.LastAccountId);
         if (string.IsNullOrEmpty(model.UrlReturn))
         {
             return RedirectToAction("Index");
@@ -146,7 +147,7 @@ public class TransactionController : Controller
         
         model.UserId = userId;
         if (model.OperationTypeId == OperationType.Gasto)
-            model.Mount *= -1;
+            model.Amount *= -1;
         
         await _transactionRepository.Create(model);
         return RedirectToAction("Index");
@@ -183,9 +184,61 @@ public class TransactionController : Controller
         return View(model);
     }
 
-    public IActionResult WeeklyReport()
+    public async Task<IActionResult> WeeklyReport(int month, int year)
     {
-        return View();
+        var userId = _userServices.GetUserId();
+        IEnumerable<WeeklyResultDto> transactionsWeek = await  _reportService.GetTransactionReportPerWeek(userId, month,year,ViewBag);
+        
+        var grouped = transactionsWeek.GroupBy(x=> x.Week).Select(x =>
+                    new WeeklyResultDto()
+                    {
+                        Week = x.Key,
+                        Incomes = x.Where(w=> w.OperationTypeId == OperationType.Ingreso).Select(o=> o.Amount).FirstOrDefault(),
+                        Expenses = x.Where(w=> w.OperationTypeId == OperationType.Gasto).Select(o=> o.Amount).FirstOrDefault()
+                    }).ToList();
+
+        if (year == 0 || month == 0)
+        {
+            var today = DateTime.Today;
+            
+            year = today.Year;
+            month = today.Month;
+        }
+
+        var refDate = new DateTime(year,month,1);
+        var daysOfMonth = Enumerable.Range(1, refDate.AddMonths(1).AddDays(-1).Day);
+
+        var segmentedDays = daysOfMonth.Chunk(7).ToList();
+
+        for (int i = 0; i < segmentedDays.Count(); i++)
+        {
+            var week = i + 1;
+            var startDate = new DateTime(year,month,segmentedDays[i].First());
+            var endDate = new DateTime(year,month,segmentedDays[i].Last());
+            var groupWeek = grouped.FirstOrDefault(x => x.Week == week);
+
+            if (groupWeek is null)
+            {
+                grouped.Add(new WeeklyResultDto()
+                {
+                    Week =  week,
+                    StartDate = startDate,
+                    EndDate = endDate
+                });
+            }
+            else
+            {
+                groupWeek.StartDate = startDate;
+                groupWeek.EndDate = endDate;
+            }
+        }
+        
+        grouped = grouped.OrderByDescending(x=>x.Week).ToList();
+
+        var model = new WeeklyReportViewModel();
+        model.TransactionPerWeek = grouped;
+        model.BaseDate = refDate;
+        return View(model);
     }
     public IActionResult MonthlyReport()
     {
