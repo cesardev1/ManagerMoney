@@ -240,9 +240,54 @@ public class TransactionController : Controller
         model.BaseDate = refDate;
         return View(model);
     }
-    public IActionResult MonthlyReport()
+
+    public async Task<IActionResult> MonthlyReport(int year)
     {
-        return View();
+        var userId = _userServices.GetUserId();
+
+        if (year == 0)
+        {
+            year = DateTime.Today.Year;
+        }
+
+        var transactionsPerMonth = await _transactionRepository.GetPerMonth(userId, year);
+
+        var groupedTransactions = transactionsPerMonth.GroupBy(x => x.Month)
+            .Select(x => new MonthlyResultDto()
+            {
+                Month = x.Key,
+                Income = x.Where(i => i.OperationTypeId == OperationType.Ingreso)
+                    .Select(t => t.Amount).FirstOrDefault(),
+                Expense = x.Where(e => e.OperationTypeId == OperationType.Gasto)
+                    .Select(t => t.Amount).FirstOrDefault()
+            }).ToList();
+
+        for (int month = 1; month <= 12; month++)
+        {
+            var transaction = groupedTransactions.FirstOrDefault(x => x.Month == month);
+            var baseDate = new DateTime(year, month, 1);
+            if (transaction is null)
+            {
+                groupedTransactions.Add(new MonthlyResultDto()
+                {
+                    Month = month,
+                    BaseDate = baseDate
+                });
+            }
+            else
+            {
+                transaction.BaseDate= baseDate;
+            }
+
+        }
+
+        groupedTransactions = groupedTransactions.OrderByDescending(x => x.Month).ToList();
+        
+        var model = new MonthlyReportViewModel();
+        model.Year=year;
+        model.TransactionsPerMonth = groupedTransactions;
+        
+        return View(model);
     }
     public IActionResult ExcelReport()
     {
