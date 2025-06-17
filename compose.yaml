@@ -2,37 +2,52 @@
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: sqlserver
-    environment: 
+    environment:
       SA_PASSWORD: "${SA_PASSWORD}"
       ACCEPT_EULA: "Y"
     ports:
       - "1433:1433"
     volumes:
-      - /run/desktop/mnt/host/c/dev/ManagerMoney/sql:/scripts
+      - sql_data:/var/opt/mssql
     networks:
       - appnet
-        
+  
   initdb:
-    image: mcr.microsoft.com/dotnet/sdk:7.0
+    build:
+      context: ./initdb
     depends_on:
       - sqlserver
-    entrypoint: >
-      bash -c "
-        sleep 20 &&
-        apt-get update &&
-        apt-get install -y curl gnupg &&
-        curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - &&
-        curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list &&
-        apt-get update &&
-        ACCEPT_EULA=Y apt-get install -y mssql-tools &&
-        /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P '${SA_PASSWORD}' -i /scripts/init.sql
-      "
     volumes:
       - ./sql:/scripts
     networks:
       - appnet
     environment:
-      SA_PASSWORD: "${SA_PASSWORD}"
+      - SA_PASSWORD=${SA_PASSWORD}
+    restart: on-failure
+
+  managerapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: managerapp
+    ports:
+      - "5000:8080"
+    depends_on:
+      - sqlserver
+      - initdb
+    environment:
+      - CONNECTIONSTRING_DEFAULT=Server=sqlserver,1433;Database=ManejoPresupuesto;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
+    networks:
+      - appnet
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+volumes:
+  sql_data:
 
 networks:
   appnet:

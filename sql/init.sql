@@ -1,6 +1,7 @@
 ﻿CREATE DATABASE ManejoPresupuesto;
 GO
-USE [ManejoPresupuesto]
+
+USE ManejoPresupuesto
 GO
 /****** Object:  Table [dbo].[Categorias]    Script Date: 10-Nov-21 5:23:42 PM ******/
 SET ANSI_NULLS ON
