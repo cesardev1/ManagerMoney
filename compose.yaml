@@ -1,0 +1,38 @@
+﻿services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    environment: 
+      SA_PASSWORD: "${SA_PASSWORD}"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - /run/desktop/mnt/host/c/dev/ManagerMoney/sql:/scripts
+    networks:
+      - appnet
+        
+  initdb:
+    image: mcr.microsoft.com/dotnet/sdk:7.0
+    depends_on:
+      - sqlserver
+    entrypoint: >
+      bash -c "
+        sleep 20 &&
+        apt-get update &&
+        apt-get install -y curl gnupg &&
+        curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - &&
+        curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list &&
+        apt-get update &&
+        ACCEPT_EULA=Y apt-get install -y mssql-tools &&
+        /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P '${SA_PASSWORD}' -i /scripts/init.sql
+      "
+    volumes:
+      - ./sql:/scripts
+    networks:
+      - appnet
+    environment:
+      SA_PASSWORD: "${SA_PASSWORD}"
+
+networks:
+  appnet:
