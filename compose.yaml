@@ -1,8 +1,9 @@
-﻿services:
+﻿services: 
+  
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: sqlserver
-    environment:
+    environment: 
       SA_PASSWORD: "${SA_PASSWORD}"
       ACCEPT_EULA: "Y"
     ports:
@@ -11,43 +12,45 @@
       - sql_data:/var/opt/mssql
     networks:
       - appnet
-  
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -N -C -b -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+      
   initdb:
     build:
       context: ./initdb
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_healthy
     volumes:
       - ./sql:/scripts
     networks:
       - appnet
     environment:
       - SA_PASSWORD=${SA_PASSWORD}
-    restart: on-failure
-
+  
   managerapp:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: managerapp
-    ports:
+    ports: 
       - "5000:8080"
     depends_on:
-      - sqlserver
-      - initdb
+      sqlserver:
+        condition: service_healthy
+      initdb:
+        condition: service_completed_successfully
     environment:
       - CONNECTIONSTRING_DEFAULT=Server=sqlserver,1433;Database=ManejoPresupuesto;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
     networks:
       - appnet
-    restart: on-failure
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-
+  
 volumes:
   sql_data:
-
+    
 networks:
   appnet:
