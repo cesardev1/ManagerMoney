@@ -1,42 +1,18 @@
 ﻿@model DetailedTransactionReport
 
+@{
+    var amountSummary = new AmountSummaryViewModel()
+    {
+        Incomes = Model.TotalDeposit, 
+        Expenses = Model.TotalWithdraw,
+        Total = Model.TotalBalance
+    };
+    
+}
 
-<h4>
-    <a asp-route-month="@ViewBag.LastMonth" asp-route-year="@ViewBag.LastYear" class="btn btn-secondary">
-        <i class="bi-chevron-left"></i>
-    </a>
-    @Model.StartDate.ToString("MMMM") @Model.StartDate.Year
-    <a asp-route-month="@ViewBag.NextMonth" asp-route-year="@ViewBag.NextYear" class="btn btn-secondary">
-        <i class="bi-chevron-right"></i>   
-    </a>
-</h4>
+<partial name="_MonthNavigator" model="@Model.StartDate"/>
 
-<div class="total-container mb-3">
-    <div>
-        <div>
-            <strong>Depositos</strong>
-        </div>
-        <div class="asset">
-            @Model.TotalDeposit
-        </div>
-    </div>
-    <div>
-        <div>
-            <strong>Retiros</strong>
-        </div>
-        <div class="liability">
-            @Model.TotalWithdraw
-        </div>
-    </div>
-    <div>
-        <div>
-            <strong>Depositos</strong>
-        </div>
-        <div class="asset">
-            @Model.TotalBalance
-        </div>
-    </div>
-</div> 
+<partial name="_AmountSummary" model="@amountSummary"/>
 
 @if (Model.GroupedTransactions.Count() == 0)
 {
@@ -65,8 +41,8 @@ else
                     </td>
                     <td>@transaction.Category</td>
                     <td>@transaction.Account</td>
-                    <td class="asset">@(transaction.OperationTypeId== OperationType.Ingreso? transaction.Mount.ToString("N") : null)</td>
-                    <td class="liability">@(transaction.OperationTypeId== OperationType.Gasto? transaction.Mount.ToString("N") : null)</td>
+                    <td class="asset">@(transaction.OperationTypeId== OperationType.Ingreso? transaction.Amount.ToString("N") : null)</td>
+                    <td class="liability">@(transaction.OperationTypeId== OperationType.Gasto? transaction.Amount.ToString("N") : null)</td>
                 </tr>
             }
         }

@@ -10,7 +10,7 @@ public class Transaction
     [DataType(DataType.Date)]
     public DateTime DateTransaction { get; set; } = DateTime.Today;
     [Display(Name = "Monto")]
-    public decimal Mount { get; set; }
+    public decimal Amount { get; set; }
     [Range(1,maximum:int.MaxValue,ErrorMessage = "Debe Seleccionar una categoria")]
     [Display(Name = "Categoria")]
     public int CategoryId { get; set; }

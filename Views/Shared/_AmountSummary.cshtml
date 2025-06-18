@@ -1,0 +1,29 @@
+﻿@model AmountSummaryViewModel
+
+
+<div class="total-container mb-3">
+    <div>
+        <div>
+            <strong>Depositos</strong>
+        </div>
+        <div class="asset">
+            @Model.Incomes
+        </div>
+    </div>
+    <div>
+        <div>
+            <strong>Retiros</strong>
+        </div>
+        <div class="liability">
+            @Model.Expenses
+        </div>
+    </div>
+    <div>
+        <div>
+            <strong>Depositos</strong>
+        </div>
+        <div class="asset">
+            @Model.Total
+        </div>
+    </div>
+</div> 

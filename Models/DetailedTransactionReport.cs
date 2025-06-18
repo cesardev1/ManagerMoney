@@ -15,10 +15,10 @@ public class DetailedTransactionReport
         public IEnumerable<Transaction> Transactions { get; set; }
 
         public decimal DepositBalance => Transactions.Where(x => x.OperationTypeId == OperationType.Ingreso)
-                                                     .Sum(x => x.Mount);
+                                                     .Sum(x => x.Amount);
 
         public decimal WithdrawBalance => Transactions.Where(x => x.OperationTypeId == OperationType.Gasto)
-                                                      .Sum(x=> x.Mount);
+                                                      .Sum(x=> x.Amount);
         
         
     }
