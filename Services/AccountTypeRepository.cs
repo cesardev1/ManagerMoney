@@ -46,10 +46,10 @@ namespace ManagerMoney.Services
         public async Task<IEnumerable<AccountType>> GetAll(int userId)
         {
             using var connection = new SqlConnection(_secretOptions.ConnectionString);
-            var accountTypes = await connection.QueryAsync<AccountType>(@"SELECT Id, Name, UserId, OrderBy
+            var accountTypes = await connection.QueryAsync<AccountType>(@"SELECT Id, Name, UserId, OrderIndex
                                                                         FROM accountType
                                                                         WHERE UserId = @UserId
-                                                                        ORDER BY OrderBy", new { userId });
+                                                                        ORDER BY OrderIndex", new { userId });
             return accountTypes;
         }
 
@@ -64,7 +64,7 @@ namespace ManagerMoney.Services
         public async Task<AccountType> GetById(int id,int userId)
         {
             using var connection = new SqlConnection(_secretOptions.ConnectionString);
-            return await connection.QueryFirstOrDefaultAsync<AccountType>(@"SELECT Id, Name, OrderBy
+            return await connection.QueryFirstOrDefaultAsync<AccountType>(@"SELECT Id, Name, OrderIndex
                                                                             FROM accountType
                                                                             WHERE Id = @Id AND UserId = @UserId", new { id, userId} );
             
@@ -78,7 +78,7 @@ namespace ManagerMoney.Services
 
         public async Task Order(IEnumerable<AccountType> accountTypes)
         {
-            var query = "UPDATE accountType SET OrderBy = @OrderBy WHERE Id = @Id";
+            var query = "UPDATE accountType SET OrderIndex = @OrderIndex WHERE Id = @Id";
             using var connection = new SqlConnection(_secretOptions.ConnectionString);
             await connection.ExecuteAsync(query, accountTypes);
         }
