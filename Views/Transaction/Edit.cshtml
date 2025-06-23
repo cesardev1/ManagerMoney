@@ -12,12 +12,12 @@
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="UrlReturn" />
-    <input type="hidden" asp-for="LastAmount" />
+    <input type="hidden" asp-for="PreviousAmount" />
     <input type="hidden" asp-for="LastAccountId" />
     <div class="mb-3">
-        <label asp-for="DateTransaction" class="form-label"></label>
-        <input asp-for="DateTransaction" class="form-control" />
-        <span asp-validation-for="DateTransaction" class="text-danger"></span>
+        <label asp-for="TransactionDate" class="form-label"></label>
+        <input asp-for="TransactionDate" class="form-control" />
+        <span asp-validation-for="TransactionDate" class="text-danger"></span>
     </div>
     
     <div class="mb-3">

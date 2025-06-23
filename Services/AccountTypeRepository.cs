@@ -26,7 +26,7 @@ namespace ManagerMoney.Services
         public async Task Create(AccountType accountType)
         {
             using var connection = new SqlConnection(_secretOptions.ConnectionString);
-            var id = await connection.QuerySingleAsync<int>($@"AccountType_Insert",
+            var id = await connection.QuerySingleAsync<int>($@"AccountsType_Insert",
                 new {UserId= accountType.UserId, Name = accountType.Name},
                 commandType: System.Data.CommandType.StoredProcedure);
             accountType.Id = id;
@@ -36,7 +36,7 @@ namespace ManagerMoney.Services
         {
             using var connection = new SqlConnection(_secretOptions.ConnectionString);
             var exist = await connection.QueryFirstOrDefaultAsync<int>(@"SELECT 1 
-                                                                        FROM accountType
+                                                                        FROM accountsType
                                                                         WHERE Name = @Name AND UserId = @UserId;",
                                                                         new { name, userId });
 
@@ -46,17 +46,17 @@ namespace ManagerMoney.Services
         public async Task<IEnumerable<AccountType>> GetAll(int userId)
         {
             using var connection = new SqlConnection(_secretOptions.ConnectionString);
-            var accountTypes = await connection.QueryAsync<AccountType>(@"SELECT Id, Name, UserId, OrderBy
-                                                                        FROM accountType
+            var accountTypes = await connection.QueryAsync<AccountType>(@"SELECT Id, Name, UserId, OrderIndex
+                                                                        FROM accountsType
                                                                         WHERE UserId = @UserId
-                                                                        ORDER BY OrderBy", new { userId });
+                                                                        ORDER BY OrderIndex", new { userId });
             return accountTypes;
         }
 
         public async Task Update(AccountType accountType)
         {
             using var connection = new SqlConnection(_secretOptions.ConnectionString);
-            await connection.ExecuteAsync(@"UPDATE accountType
+            await connection.ExecuteAsync(@"UPDATE accountsType
                                             SET Name = @Name
                                             WHERE Id = @Id",accountType);
         }
@@ -64,8 +64,8 @@ namespace ManagerMoney.Services
         public async Task<AccountType> GetById(int id,int userId)
         {
             using var connection = new SqlConnection(_secretOptions.ConnectionString);
-            return await connection.QueryFirstOrDefaultAsync<AccountType>(@"SELECT Id, Name, OrderBy
-                                                                            FROM accountType
+            return await connection.QueryFirstOrDefaultAsync<AccountType>(@"SELECT Id, Name, OrderIndex
+                                                                            FROM accountsType
                                                                             WHERE Id = @Id AND UserId = @UserId", new { id, userId} );
             
         }
@@ -78,7 +78,7 @@ namespace ManagerMoney.Services
 
         public async Task Order(IEnumerable<AccountType> accountTypes)
         {
-            var query = "UPDATE accountType SET OrderBy = @OrderBy WHERE Id = @Id";
+            var query = "UPDATE accountsType SET OrderIndex = @OrderIndex WHERE Id = @Id";
             using var connection = new SqlConnection(_secretOptions.ConnectionString);
             await connection.ExecuteAsync(query, accountTypes);
         }

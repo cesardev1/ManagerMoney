@@ -141,7 +141,7 @@ namespace ManagerMoney.Controllers
                 return Forbid();
 
             var accountTypesOrder = ids.Select((value,index)=>
-                                        new AccountType() {Id = value,OrderBy = index + 1}).AsEnumerable();
+                                        new AccountType() {Id = value,OrderIndex = index + 1}).AsEnumerable();
             
             await _accountTypeRepository.Order(accountTypesOrder);
             

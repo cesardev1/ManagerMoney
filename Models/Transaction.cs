@@ -8,7 +8,7 @@ public class Transaction
     public int UserId { get; set; }
     [Display(Name = "Fecha de transaccion")]
     [DataType(DataType.Date)]
-    public DateTime DateTransaction { get; set; } = DateTime.Today;
+    public DateTime TransactionDate { get; set; } = DateTime.Today;
     [Display(Name = "Monto")]
     public decimal Amount { get; set; }
     [Range(1,maximum:int.MaxValue,ErrorMessage = "Debe Seleccionar una categoria")]

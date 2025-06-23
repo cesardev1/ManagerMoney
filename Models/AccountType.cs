@@ -13,6 +13,6 @@ namespace ManagerMoney.Models
         [Remote(action: "ValidateExistAccountType", controller: "AccountTypes")]
         public string Name { get; set; }
         public int UserId { get; set; }
-        public int OrderBy { get; set; }
+        public int OrderIndex { get; set; }
     }
 }

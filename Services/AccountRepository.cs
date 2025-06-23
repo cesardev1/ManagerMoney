@@ -26,7 +26,7 @@ public class AccountRepository: IAccountRepository
     {
         using var connection = new SqlConnection(_secretsOptions.ConnectionString);
         var id = await connection.QuerySingleAsync<int>(
-            @"INSERT INTO Account (Name,AccountTypeId,Description,Balance)
+            @"INSERT INTO Accounts (Name,AccountTypeId,Description,Balance)
                   VALUES (@Name, @AccountTypeId, @Description, @Balance);
                   SELECT SCOPE_IDENTITY();",account);
         
@@ -36,12 +36,12 @@ public class AccountRepository: IAccountRepository
     public async Task<IEnumerable<Account>> FindByUserId(int userId)
     {
         using var connection = new SqlConnection(_secretsOptions.ConnectionString);
-        return await connection.QueryAsync<Account>(@"SELECT Account.id, Account.name, balance, description, aT.Name AS AccountType
-                                                        FROM Account
-                                                        INNER JOIN accountType aT 
-                                                        ON aT.Id = Account.AccountTypeId
+        return await connection.QueryAsync<Account>(@"SELECT Accounts.id, Accounts.name, Balance, Description, aT.Name AS AccountType
+                                                        FROM Accounts
+                                                        INNER JOIN accountsType aT 
+                                                        ON aT.Id = Accounts.AccountTypeId
                                                         WHERE aT.UserId = @UserId
-                                                        ORDER BY aT.OrderBy",new {userId});
+                                                        ORDER BY aT.OrderIndex",new {userId});
                                                                         
     }
 
@@ -50,17 +50,17 @@ public class AccountRepository: IAccountRepository
         using var connection = new SqlConnection(_secretsOptions.ConnectionString);
         
         return await connection.QueryFirstOrDefaultAsync<Account>(
-            @"SELECT Account.Id, Account.Name,Balance, Account.AccountTypeId
-                FROM Account
-                INNER JOIN accountType aT 
-                ON at.Id = Account.AccountTypeId
-                WHERE aT.UserId = @UserId AND Account.Id = @Id", new { id, userId });
+            @"SELECT Accounts.Id, Accounts.Name,Balance, Accounts.AccountTypeId
+                FROM Accounts
+                INNER JOIN accountsType aT 
+                ON at.Id = Accounts.AccountTypeId
+                WHERE aT.UserId = @UserId AND Accounts.Id = @Id", new { id, userId });
     }
 
     public async Task Update(AccountCreateViewModel account)
     {
         using var connection = new SqlConnection(_secretsOptions.ConnectionString);
-        await connection.ExecuteAsync(@"UPDATE Account
+        await connection.ExecuteAsync(@"UPDATE Accounts
                                             SET Name=@Name, AccountTypeId=@AccountTypeId, Description=@Description, Balance=@Balance
                                             WHERE Id = @Id",account);
     }
