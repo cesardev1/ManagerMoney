@@ -73,7 +73,8 @@ namespace ManagerMoney.Services
         public async Task Delete(int id)
         {
             using var connection = new SqlConnection(_secretOptions.ConnectionString);
-            await connection.ExecuteAsync(@"DELETE accountType WHERE Id = @Id",new { id });
+            await connection.ExecuteAsync(@"DELETE accountsType 
+                                                WHERE Id = @Id",new { id });
         }
 
         public async Task Order(IEnumerable<AccountType> accountTypes)

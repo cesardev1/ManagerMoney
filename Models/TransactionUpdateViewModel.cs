@@ -2,7 +2,7 @@
 
 public class TransactionUpdateViewModel: TransactionCreateViewModel
 {
-    public int LastAccountId { get; set; }
+    public int PreviousAccountId { get; set; }
     public decimal PreviousAmount { get; set; }
     public string UrlReturn { get; set; }
 }

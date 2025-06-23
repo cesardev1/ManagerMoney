@@ -48,7 +48,7 @@ public class TransactionController : Controller
         if (model.OperationTypeId == OperationType.Gasto)
             model.PreviousAmount = model.Amount * -1;
         
-        model.LastAccountId = transaction.AccountId;
+        model.PreviousAccountId = transaction.AccountId;
         model.Categories = await GetCategories(userId, transaction.OperationTypeId);
         model.Accounts = await GetAccounts(userId);
         model.UrlReturn = urlReturn;
@@ -101,7 +101,7 @@ public class TransactionController : Controller
         if (model.OperationTypeId == OperationType.Gasto)
              transaction.Amount *= -1;
         
-        await _transactionRepository.Update(transaction,model.PreviousAmount,model.LastAccountId);
+        await _transactionRepository.Update(transaction,model.PreviousAmount,model.PreviousAccountId);
         if (string.IsNullOrEmpty(model.UrlReturn))
         {
             return RedirectToAction("Index");

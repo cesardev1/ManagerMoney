@@ -42,7 +42,7 @@ public class TransactionRepository : ITransactionRepository
         transaction.Id = id;
     }
 
-    public async Task Update(Transaction transaction, decimal previousAmount, int lastAccountId)
+    public async Task Update(Transaction transaction, decimal previousAmount, int previousAccountId)
     {
         using var connection = new SqlConnection(_secretOptions.ConnectionString);
         await connection.ExecuteAsync("Transactions_Update", new
@@ -54,7 +54,7 @@ public class TransactionRepository : ITransactionRepository
                 transaction.AccountId,
                 transaction.Note,
                 previousAmount,
-                lastAccountId,
+                previousAccountId,
             },
             commandType: System.Data.CommandType.StoredProcedure
         );
@@ -129,7 +129,7 @@ public class TransactionRepository : ITransactionRepository
     public async Task Delete(int id)
     {
         using var connection = new SqlConnection(_secretOptions.ConnectionString);
-        await connection.ExecuteAsync(@"Transaction_Delete", 
+        await connection.ExecuteAsync(@"Transactions_Delete", 
                                 new { id },
                                 commandType: System.Data.CommandType.StoredProcedure);
         

@@ -39,13 +39,15 @@
     container_name: managerapp
     ports: 
       - "5000:8080"
+      - "10000:10000"
     depends_on:
       sqlserver:
         condition: service_healthy
       initdb:
         condition: service_completed_successfully
     environment:
-      - CONNECTIONSTRING_DEFAULT=Server=sqlserver,1433;Database=ManejoPresupuesto;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
+      - ASPNETCORE_ENVIRONMENT=Development
+      - CONNECTIONSTRING_DEFAULT=Server=sqlserver,1433;Database=BudgetManager;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
     networks:
       - appnet
   
