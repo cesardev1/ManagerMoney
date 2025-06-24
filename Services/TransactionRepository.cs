@@ -33,7 +33,7 @@ public class TransactionRepository : ITransactionRepository
             {
                 transaction.UserId,
                 transaction.TransactionDate,
-                Amount = transaction.Amount,
+                transaction.Amount,
                 transaction.CategoryId,
                 transaction.AccountId,
                 transaction.Note
@@ -42,18 +42,18 @@ public class TransactionRepository : ITransactionRepository
         transaction.Id = id;
     }
 
-    public async Task Update(Transaction transaction, decimal lastAmount, int lastAccountId)
+    public async Task Update(Transaction transaction, decimal previousAmount, int lastAccountId)
     {
         using var connection = new SqlConnection(_secretOptions.ConnectionString);
         await connection.ExecuteAsync("Transactions_Update", new
             {
                 transaction.Id,
                 transaction.TransactionDate,
-                Amount = transaction.Amount,
+                transaction.Amount,
                 transaction.CategoryId,
                 transaction.AccountId,
                 transaction.Note,
-                lastAmount,
+                previousAmount,
                 lastAccountId,
             },
             commandType: System.Data.CommandType.StoredProcedure
@@ -64,10 +64,10 @@ public class TransactionRepository : ITransactionRepository
     {
         using var connection = new SqlConnection(_secretOptions.ConnectionString);
         return await connection.QueryAsync<Transaction>(@"SELECT t.Id,t.Amount,t.TransactionDate,c.Name as Category
-                                                              FROM [Transaction] t
+                                                              FROM [Transactions] t
                                                               INNER JOIN Categories  c
                                                               ON c.Id = t.CategoryId
-                                                              INNER JOIN Account  a
+                                                              INNER JOIN Accounts  a
                                                               ON a.Id = t.AccountId
                                                               WHERE t.AccountId = @AccountId AND t.UserId = @UserId
                                                               AND TransactionDate BETWEEN @StartDate AND @EndDate",
@@ -79,10 +79,10 @@ public class TransactionRepository : ITransactionRepository
         using var connection = new SqlConnection(_secretOptions.ConnectionString);
         return await connection.QueryAsync<WeeklyResultDto>(
             @"SELECT DATEDIFF(d, @StartDate, TransactionDate)/7+1 as Week, SUM(Amount) as Amount, cat.OperationTypeId
-                                                                FROM [ManejoPresupuesto].[dbo].[Transaction]
+                                                                FROM [Transactions]
                                                                 INNER JOIN [Categories] cat
-                                                                ON cat.Id = [Transaction].CategoryId
-                                                                WHERE [Transaction].UserId = @UserId AND
+                                                                ON cat.Id = [Transactions].CategoryId
+                                                                WHERE [Transactions].UserId = @UserId AND
                                                                 TransactionDate BETWEEN @StartDate AND @EndDate
                                                                 Group By DATEDIFF(d, @StartDate, TransactionDate)/7, cat.OperationTypeId"
             , model);
@@ -93,10 +93,10 @@ public class TransactionRepository : ITransactionRepository
         using var connection = new SqlConnection(_secretOptions.ConnectionString);
         return await connection.QueryAsync<MonthlyResultDto>(@"SELECT MONTH(TransactionDate) as Month,
                                                                    SUM(Amount) as Amount, cat.OperationTypeId
-                                                                   FROM [Transaction]
+                                                                   FROM [Transactions]
                                                                    INNER JOIN Categories cat
-                                                                   ON cat.Id = [Transaction].CategoryId
-                                                                   WHERE [Transaction].UserId = @userId AND YEAR([Transaction].TransactionDate) = @Year
+                                                                   ON cat.Id = [Transactions].CategoryId
+                                                                   WHERE [Transactions].UserId = @userId AND YEAR([Transactions].TransactionDate) = @Year
                                                                    GROUP BY MONTH(TransactionDate), cat.OperationTypeId;", new { userId, year });
     }
 
@@ -104,10 +104,10 @@ public class TransactionRepository : ITransactionRepository
     {
         using var connection = new SqlConnection(_secretOptions.ConnectionString);
         return await connection.QueryAsync<Transaction>(@"SELECT t.Id,t.Amount,t.TransactionDate,c.Name as Category, a.Name as Account, c.OperationTypeId, Note
-                                                              FROM [Transaction] t
+                                                              FROM [Transactions] t
                                                               INNER JOIN Categories  c
                                                               ON c.Id = t.CategoryId
-                                                              INNER JOIN Account  a
+                                                              INNER JOIN Accounts  a
                                                               ON a.Id = t.AccountId
                                                               WHERE t.UserId = @UserId
                                                               AND TransactionDate BETWEEN @StartDate AND @EndDate
@@ -118,11 +118,11 @@ public class TransactionRepository : ITransactionRepository
     {
         using var connection = new SqlConnection(_secretOptions.ConnectionString);
         return await connection.QueryFirstOrDefaultAsync<Transaction>(
-            @"SELECT [Transaction].*, cat.OperationTypeId
-                  From [Transaction]
+            @"SELECT [Transactions].*, cat.OperationTypeId
+                  From [Transactions]
                   INNER JOIN Categories as cat
-                  ON cat.Id = [Transaction].CategoryId
-                  WHERE [Transaction].Id = @Id AND [Transaction].UserId = @UserId",
+                  ON cat.Id = [Transactions].CategoryId
+                  WHERE [Transactions].Id = @Id AND [Transactions].UserId = @UserId",
             new { id, userId });
     }
 

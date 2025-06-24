@@ -87,8 +87,8 @@ public class ReportService : IReportService
     {
         var model = new DetailedTransactionReport();
 
-        var transactionsPerDate = transactions.OrderByDescending(x => x.DateTransaction)
-            .GroupBy(x => x.DateTransaction)
+        var transactionsPerDate = transactions.OrderByDescending(x => x.TransactionDate)
+            .GroupBy(x => x.TransactionDate)
             .Select(group => new DetailedTransactionReport.TransactionPerDate()
             {
                 TransactionDate = group.Key,

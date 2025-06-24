@@ -43,10 +43,10 @@ public class TransactionController : Controller
         
         var model = _mapper.Map<TransactionUpdateViewModel>(transaction);
 
-        model.LastAmount = model.Amount;
+        model.PreviousAmount = model.Amount;
         
         if (model.OperationTypeId == OperationType.Gasto)
-            model.LastAmount = model.Amount * -1;
+            model.PreviousAmount = model.Amount * -1;
         
         model.LastAccountId = transaction.AccountId;
         model.Categories = await GetCategories(userId, transaction.OperationTypeId);
@@ -101,7 +101,7 @@ public class TransactionController : Controller
         if (model.OperationTypeId == OperationType.Gasto)
              transaction.Amount *= -1;
         
-        await _transactionRepository.Update(transaction,model.LastAmount,model.LastAccountId);
+        await _transactionRepository.Update(transaction,model.PreviousAmount,model.LastAccountId);
         if (string.IsNullOrEmpty(model.UrlReturn))
         {
             return RedirectToAction("Index");
