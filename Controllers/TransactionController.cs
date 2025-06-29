@@ -1,5 +1,7 @@
-﻿using System.Runtime.InteropServices.JavaScript;
+﻿using System.Data;
+using System.Runtime.InteropServices.JavaScript;
 using AutoMapper;
+using ClosedXML.Excel;
 using ManagerMoney.Models;
 using ManagerMoney.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -292,6 +294,96 @@ public class TransactionController : Controller
     public IActionResult ExcelReport()
     {
         return View();
+    }
+
+    [HttpGet]
+    public async Task<FileResult> ExportMonthlyExcel(int month, int year)
+    {
+        var startDate = new DateTime(year,month,1);
+        var endDate = startDate.AddMonths(1).AddDays(-1);
+        var userId = _userServices.GetUserId();
+
+        var transactions = await _transactionRepository.GetAllByUserId(new TransactionByUserQueryParameters
+        {
+            UserId = userId,
+            StartDate = startDate,
+            EndDate = endDate
+        });
+
+        var fileName = $"Manejo Presupuesto - {startDate.ToString("MMM yyyy")}.xlsx";
+        return GenerateExcel(fileName, transactions);
+    }
+
+    [HttpGet]
+    public async Task<FileResult> ExportYearlyExcel(int year)
+    {
+        var startDate= new DateTime(year,1,1);
+        var endDate = startDate.AddYears(1).AddDays(-1);
+        var userId = _userServices.GetUserId();
+        
+        var transactions = await _transactionRepository.GetAllByUserId(new TransactionByUserQueryParameters
+        {
+            UserId = userId,
+            StartDate = startDate,
+            EndDate = endDate
+        });
+        
+        var fileName = $"Manejo Presupuesto - { startDate.ToString("yyyy") }.xlsx";
+        return GenerateExcel(fileName, transactions);
+    }
+
+    public async Task<FileResult> ExportFullTransactionHistory()
+    {
+        var startDate = DateTime.Today.AddYears(-100);
+        var endDate = DateTime.Today.AddYears(100);
+        var userId = _userServices.GetUserId();
+        
+        var transactions = await _transactionRepository.GetAllByUserId(new TransactionByUserQueryParameters
+        {
+            UserId = userId,
+            StartDate = startDate,
+            EndDate = endDate
+        });
+        
+        var fileName = $"Manejo Presupuesto - { startDate.ToString("dd-MM-yyyy") }.xlsx";
+        return GenerateExcel(fileName, transactions);
+    }
+
+    private FileResult GenerateExcel(string fileName,IEnumerable<Transaction> transactions)
+    {
+        DataTable dataTable = new DataTable("Transactions");
+        dataTable.Columns.AddRange(new DataColumn[]
+        {
+            new DataColumn("Date"),
+            new DataColumn("Account"),
+            new DataColumn("Category"),
+            new DataColumn("Note"),
+            new DataColumn("Amount"),
+            new DataColumn("Income/Expense")
+        });
+
+        foreach (var transaction in transactions)
+        {
+            dataTable.Rows.Add(
+                    transaction.TransactionDate,
+                    transaction.Account,
+                    transaction.Category,
+                    transaction.Note,
+                    transaction.Amount,
+                    transaction.OperationTypeId
+                );
+        }
+
+        using (XLWorkbook wb = new XLWorkbook())
+        {
+            wb.Worksheets.Add(dataTable);
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                wb.SaveAs(stream);
+                return File(stream.ToArray(),"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",fileName);
+            }
+        }
     }
     public IActionResult Calendar()
     {
