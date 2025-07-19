@@ -389,4 +389,26 @@ public class TransactionController : Controller
     {
         return View();
     }
+
+    public async Task<JsonResult> GetCalendarTransactions(DateTime start, DateTime end)
+    {
+        var userId = _userServices.GetUserId();
+        
+        var transactions = await _transactionRepository.GetAllByUserId(new TransactionByUserQueryParameters
+        {
+            UserId = userId,
+            StartDate = start,
+            EndDate = end
+        });
+
+        var calendarEvents = transactions.Select(t => new CalendarEventDto()
+        {
+            Title = t.Amount.ToString("N"),
+            Start = t.TransactionDate.ToString("yyyy-MM-dd"),
+            End = t.TransactionDate.ToString("yyyy-MM-dd"),
+            Color = (t.OperationTypeId == OperationType.Gasto) ? "Red" : null
+        });
+
+        return Json(calendarEvents);
+    } 
 }
