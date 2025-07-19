@@ -4,7 +4,21 @@
 <partial name="_Submenu" model="SubMenuTransaction.Calendar"/>
 <h1>Calendario</h1>
 
+<div id="calendar"></div>
+
 @section Scripts
 {
     <script src="~/lib/Fullcalendar/main.min.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded",function(){
+            const calendarEL= document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEL, {
+                dayMaxEventRows:3,
+                initialView: 'dayGridMonth'
+            });
+            
+            calendar.render();
+        })
+    </script>
 }
