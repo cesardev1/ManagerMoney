@@ -410,5 +410,19 @@ public class TransactionController : Controller
         });
 
         return Json(calendarEvents);
-    } 
+    }
+
+    public async Task<JsonResult> GetTransactionsPerDate(DateTime date)
+    {
+        var userId = _userServices.GetUserId();
+        
+        var transactions = await _transactionRepository.GetAllByUserId(new TransactionByUserQueryParameters
+        {
+            UserId = userId,
+            StartDate = date,
+            EndDate = date
+        });
+        
+        return Json(transactions);
+    }
 }
