@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Folder Include="initdb\" />
+    <Folder Include="wwwroot\lib\Fullcalendar\" />
   </ItemGroup>
 
 </Project>
