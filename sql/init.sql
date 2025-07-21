@@ -105,7 +105,7 @@ BEGIN
     FROM AccountsType
     WHERE UserId = @UserId
 
-    INSERT INTO AccountsType(AccountsType.Name, UserId, AccountsType.OrderIndex)
+    INSERT INTO AccountsType(Name, UserId, OrderIndex)
     VALUES (@Name, @UserId, @Order);
 
     SELECT SCOPE_IDENTITY();
@@ -210,3 +210,34 @@ BEGIN
     WHERE Id = @Id;
 END
 go
+
+CREATE PROCEDURE [dbo].[CreateDataNewUser]
+    @UserId int
+AS
+BEGIN 
+    SET NOCOUNT ON; 
+    
+    DECLARE @Efectivo nvarchar(50) = 'Efectivo';
+    DECLARE @CuentasDeBanco nvarchar(50) = 'Cuentas de Banco';
+    DECLARE @Tarjetas nvarchar(50) = 'Tarjetas';
+    
+    INSERT INTO AccountsType(Name, UserId, OrderIndex)
+    VALUES (@Efectivo, @UserId, 1),
+           (@CuentasDeBanco, @UserId, 2),
+           (@Tarjetas, @UserId, 3);
+    
+    INSERT INTO Accounts (Name, Balance, AccountTypeId)
+    SELECT Name, 0, Id
+    FROM AccountsType
+    WHERE UserId = @UserId;
+    
+    INSERT INTO Categories(Name, OperationTypeId, UserId)
+    VALUES 
+        ('Libros',2, @UserId),
+        ('Salario',1,@UserId),
+        ('Mesada',1,@UserId),
+        ('Comida',2,@UserId),
+        ('Transporte',2,@UserId);
+
+END
+GO
