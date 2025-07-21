@@ -4,6 +4,7 @@ using AutoMapper;
 using ClosedXML.Excel;
 using ManagerMoney.Models;
 using ManagerMoney.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -176,7 +177,7 @@ public class TransactionController : Controller
     }
     
     // Reports section: the "Index" refers to the daily report
-
+    [Authorize]
     public async Task<IActionResult> Index(int month, int year)
     {
         var userId = _userServices.GetUserId();

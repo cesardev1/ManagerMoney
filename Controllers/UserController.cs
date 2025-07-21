@@ -1,4 +1,6 @@
 using ManagerMoney.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,12 +17,14 @@ public class UserController : Controller
         _signInManager = signInManager;
     }
 
+    [AllowAnonymous]
     public IActionResult SignUp()
     {
         return View();
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> SignUp(SignUpVM model)
     {
         if (!ModelState.IsValid)
@@ -47,12 +51,21 @@ public class UserController : Controller
         }
     }
 
+    [HttpPost]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
+        return RedirectToAction("Index", "Transaction");
+    }
+
+    [AllowAnonymous]
     public IActionResult Login()
     {
         return View();
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Login(LoginVM model)
     {
         if (!ModelState.IsValid)

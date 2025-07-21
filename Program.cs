@@ -1,7 +1,9 @@
 using Dapper;
 using ManagerMoney.Models;
 using ManagerMoney.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +14,15 @@ secrets.ConnectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING_
 
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+
+var userAuthPolicy = new AuthorizationPolicyBuilder()
+    .RequireAuthenticatedUser()
+    .Build();
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new AuthorizeFilter(userAuthPolicy));
+});
 builder.Services.AddSingleton(secrets);
 builder.Services.AddTransient<IAccountTypeRepository, AccountTypeRepository>();
 builder.Services.AddTransient<IUserServices, UserServices>();
@@ -31,7 +41,10 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
     options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
     options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
-}).AddCookie(IdentityConstants.ApplicationScheme);
+}).AddCookie(IdentityConstants.ApplicationScheme, options =>
+{
+    options.LoginPath = "/user/login";
+});
 
 var app = builder.Build();
 
