@@ -1,5 +1,7 @@
+using Dapper;
 using ManagerMoney.Models;
 using ManagerMoney.Services;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,9 +19,19 @@ builder.Services.AddTransient<IUserServices, UserServices>();
 builder.Services.AddTransient<IAccountRepository, AccountRepository>();
 builder.Services.AddTransient<ICategoriesRepository, CategoriesRepository>();
 builder.Services.AddTransient<ITransactionRepository, TransactionRepository>();
+builder.Services.AddTransient<IUsersRepository, UsersRepository>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<IReportService, ReportService>();
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddTransient<IUserStore<User>, UserStore>();
+builder.Services.AddIdentityCore<User>().AddErrorDescriber<ErrorMessageIdentity>();
+builder.Services.AddTransient<SignInManager<User>>();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+}).AddCookie(IdentityConstants.ApplicationScheme);
 
 var app = builder.Build();
 
@@ -33,6 +45,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
