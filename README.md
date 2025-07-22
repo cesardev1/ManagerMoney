@@ -1,147 +1,92 @@
 ﻿# Manager Money
 
-## 📋 Descripción
-Manager Money es una aplicación de gestión de presupuestos personales desarrollada con .NET 9.0, que permite a los usuarios realizar un seguimiento detallado de sus finanzas personales.
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![.NET](https://img.shields.io/badge/.NET-9.0-blueviolet)
+![Docker](https://img.shields.io/badge/Docker-Supported-blue)
 
-## 🚀 Tecnologías
-- .NET 9.0
-- SQL Server 2019
-- Docker
-- Docker Compose
+Aplicación de gestión de finanzas personales desarrollada con .NET 9, diseñada para ofrecer un seguimiento detallado de ingresos y gastos a través de una interfaz web intuitiva.
 
-## 💻 Requisitos Previos
-- [Docker](https://www.docker.com/get-started)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) (solo para desarrollo)
+## ✨ Características Principales
 
-## 🛠️ Configuración del Entorno Docker
+- **Autenticación Segura:** Registro e inicio de sesión de usuarios.
+- **Gestión de Transacciones:** Creación, edición y eliminación de transacciones, asignadas a cuentas y categorías personalizadas.
+- **Visualización Interactiva:** Un calendario para ver transacciones por fecha y un desglose detallado de ingresos y gastos.
+- **Datos Iniciales:** Creación automática de cuentas y categorías para nuevos usuarios, facilitando el primer uso.
+- **Reportes:** Generación de reportes de transacciones.
 
-### Variables de Entorno 
-Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+## 🚀 Tecnologías Utilizadas
 
-````dotenv
+- **Backend:** .NET 9, ASP.NET Core Identity
+- **Base de Datos:** SQL Server 2019
+- **Frontend:** Bootstrap 5, FullCalendar.js, jQuery
+- **Contenerización:** Docker & Docker Compose
+
+## 🏁 Empezando
+
+Asegúrate de tener instalados los siguientes requisitos previos:
+
+- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [Docker](https://www.docker.com/get-started) y [Docker Compose](https://docs.docker.com/compose/install/)
+
+### 🐳 Opción 1: Ejecución con Docker (Recomendado)
+
+1.  **Clona el repositorio:**
+    ```bash
+    git clone https://github.com/cesardev1/ManagerMoney.git
+    cd ManagerMoney
+    ```
+
+2.  **Configura las variables de entorno:**
+    Crea un archivo `.env` en la raíz del proyecto y añade tu contraseña para la base de datos:
+    ```dotenv
     SA_PASSWORD=TuContraseñaSegura123!
-````
+    ```
 
-### Ejecución 
-1. Clona el repositorio:
+3.  **Construye y ejecuta los contenedores:**
+    ```bash
+    docker-compose up -d
+    ```
 
-````bash
-git clone [URL-del-repositorio] cd ManagerMoney
-````
-2. Construye y ejecuta los contenedores:
+4.  **Accede a la aplicación:**
+    - **Aplicación Web:** `http://localhost:5000`
+    - **SQL Server:** `localhost,1433`
 
-```bash
-docker-compose up -d
-```
-3. La aplicación estará disponible en:
-    - Aplicación Web: [http://localhost:5000](http://localhost:5000)
-    - SQL Server: localhost,1433
+### 💻 Opción 2: Ejecución en Local (Sin Docker)
 
-## 🏗️ Arquitectura
-### Contenedores Docker
-El proyecto utiliza tres servicios principales:
-1. **SQL Server** (Puerto 1433)
-    - Base de datos principal
-    - Persistencia de datos mediante volúmenes
-    - Healthchecks configurados
+1.  **Configura los secretos de usuario:**
+    Inicializa los secretos de .NET en la raíz del proyecto:
+    ```bash
+    dotnet user-secrets init
+    ```
 
-2. **InitDB**
-    - Servicio de inicialización de base de datos
-    - Ejecuta scripts de migración inicial
-    - Dependiente del servicio SQL Server
+2.  **Establece la cadena de conexión:**
+    Añade tu cadena de conexión a SQL Server.
+    ```bash
+    dotnet user-secrets set "ConnectionString" "Server=localhost;Database=ManagerMoney;Integrated Security=true;TrustServerCertificate=true;"
+    ```
+    *Nota: Ajusta la cadena de conexión según tu configuración de SQL Server.*
 
-3. **ManagerApp** (Puerto 5000)
-    - Aplicación principal
-    - Interfaz web
-    - Conexión automática con la base de datos
+3.  **Ejecuta la aplicación:**
+    ```bash
+    dotnet run
+    ```
 
-## 🔧 Desarrollo Local
-### Requisitos para Desarrollo
-1. .NET 9.0 SDK
-2. IDE (recomendado: Visual Studio 2025 o JetBrains Rider)
-3. Docker Desktop
+## 🤝 Contribuciones
 
-### Comandos Útiles
+Las contribuciones son bienvenidas. Si deseas mejorar este proyecto, por favor sigue estos pasos:
 
-``` bash
-# Construir la aplicación
-dotnet build
-
-# Ejecutar pruebas
-dotnet test
-
-# Ejecutar la aplicación localmente
-dotnet run
-
-# Ver logs de Docker
-docker-compose logs -f
-
-# Detener contenedores
-docker-compose down
-```
-
-## 🛠️ Configuración del Entorno de desarollo sin Docker
-
-Crea el archivo de `secrets` para el manejo de secretos seguros
-
-```bash
-dotnet user-secrets init
-```
-Agregar la cadena de conexion a los secretos con el comando: 
-```bash
-dotnet user-secrets set "ConnectionString" "<Escribe tu cadena de conexion aqui>"
-```
-> 
-> Si SqlServer se encuentra en un entorno local regularmente tiene el siguiente formato:
->
-> Con integracion del usuario windows
-> ```dotenv
-> "Server=localhost;Database=MiBaseDeDatos;Integrated Security=true;TrustServerCertificate=true;"
->```
-> Con Usuario y contraseña de BD:
-> ````bash
-> "Server=localhost;Database=MiBaseDeDatos;User Id=miusuario;Password=micontraseña;TrustServerCertificate=true;"
-> ````
->
-
-
-
-## 📚 Base de Datos
-### Estructura
-La base de datos `ManejoPresupuesto` incluye las siguientes tablas principales:
-- Categorias
-- (otras tablas relevantes)
-
-### Migraciones
-Las migraciones se ejecutan automáticamente al iniciar el contenedor `initdb`.
-## 🤝 Contribución
-1. Fork el proyecto
-2. Crea tu rama de características (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add: alguna característica asombrosa'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## ⚙️ Configuración Avanzada
-### Healthchecks
-Los servicios incluyen healthchecks para garantizar la disponibilidad:
-- SQL Server: Verifica la conexión cada 10 segundos
-- Aplicación: Dependencias configuradas con health checks
-
-### Persistencia de Datos
-Los datos se mantienen en volúmenes Docker:
-- `sql_data`: Almacena los archivos de la base de datos
-
-## 🔐 Seguridad
-- Las contraseñas y credenciales se manejan mediante variables de entorno
-- TLS/SSL habilitado para conexiones de base de datos
-- Certificados del servidor SQL confiables configurados
+1.  Haz un Fork del proyecto.
+2.  Crea una nueva rama para tu funcionalidad (`git checkout -b feature/AmazingFeature`).
+3.  Realiza tus cambios y haz commit (`git commit -m 'Add: alguna característica asombrosa'`).
+4.  Sube tus cambios a la rama (`git push origin feature/AmazingFeature`).
+5.  Abre un Pull Request.
 
 ## 📝 Licencia
 
-## 👥 Autores
-- César Rodrigo Nieto López
+Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
 
-## 🆘 Soporte
-Para soporte, por favor abre un issue en el repositorio.
+## 📧 Contacto
 
+**César Rodrigo Nieto López** - [cesar.rnl.dev@gmail.com](mailto:cesar.rnl.dev@gmail.com)
+
+Para soporte o preguntas, por favor [abre un issue](https://github.com/cesardev1/ManagerMoney/issues) en el repositorio.
