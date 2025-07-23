@@ -6,7 +6,7 @@ namespace ManagerMoney.Services;
 
 public interface ICategoriesRepository
 {
-    Task<IEnumerable<Category>> GetAll(int userId);
+    Task<IEnumerable<Category>> GetAll(int userId, PaginationVM pagination);
     Task Create(Category category);
     Task<Category> GetById(int id, int userId);
     Task Update(Category category);
@@ -23,12 +23,15 @@ public class CategoriesRepository: ICategoriesRepository
         _secretsOptions = secretsOptions;
     }
 
-    public async Task<IEnumerable<Category>> GetAll(int userId)
+    public async Task<IEnumerable<Category>> GetAll(int userId, PaginationVM pagination)
     {
         using var connection = new SqlConnection(_secretsOptions.ConnectionString);
-        return await connection.QueryAsync<Category>(@"SELECT *
+        return await connection.QueryAsync<Category>(@$"SELECT *
                                                         FROM Categories
-                                                        WHERE UserId = @UserId", new {userId});
+                                                        WHERE UserId = @UserId
+                                                        ORDER BY  Name
+                                                        OFFSET {pagination.Offset} ROWS FETCH NEXT {pagination.RecordsPerPage} ROWS ONLY"
+                                                        , new {userId});
     }
     
     public async Task<IEnumerable<Category>> GetAll(int userId, OperationType operationType)

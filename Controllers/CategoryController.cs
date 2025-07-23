@@ -16,10 +16,10 @@ public class CategoryController : Controller
         _userServices = userServices;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(PaginationVM pagination)
     {
         var userId = _userServices.GetUserId();
-        var categories = await _categoriesRepository.GetAll(userId);
+        var categories = await _categoriesRepository.GetAll(userId,pagination);
         return View(categories);
     }
 
