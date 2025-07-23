@@ -1,0 +1,18 @@
+@model PaginationResponse
+
+@{
+        var linkTemplate = string.Concat(Model.BaseURL, "?pageIndex={0}&recordsPerPage={1}");
+}
+
+<nav>
+        <ul class="pagination">
+                @for(var pageIndex = 1; pageIndex <= Model.TotalPages; pageIndex++)
+                {
+                        <li class="page-item @(pageIndex == Model.PageIndex ? "active" : null)">
+                                <a class="page-link" href="@string.Format(linkTemplate, pageIndex, Model.RecordsPerPage)">
+                                        @pageIndex
+                                </a>
+                        </li>
+                }
+        </ul>
+</nav>

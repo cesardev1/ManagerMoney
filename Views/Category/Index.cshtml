@@ -1,16 +1,17 @@
 ﻿@model PaginationResponse<Category>
 
 @{
-    ViewData["Title"] = "Categorias";
+    ViewData["Title"] = "Categorías";
 }
 
-<h1>Categorias</h1>
-<h5>La categoria nos permite indicar en que gastamos nuestro dinero,
+<h1>Categorías</h1>
+<h5>La categoría nos permite indicar en que gastamos nuestro dinero,
     también, de donde provienen nuestros ingresos</h5>
 
 <h2> Cantidad de categorías: @Model.TotalRecords - Cantidad de páginas: @Model.TotalPages</h2>
     
 <a asp-action="Create" class="btn btn-primary mb-3">Crear</a>
+<partial name="_pagination"/>
 
 <table class="table">
     <thead>
