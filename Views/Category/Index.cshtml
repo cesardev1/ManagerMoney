@@ -1,4 +1,4 @@
-﻿@model System.Collections.Generic.IEnumerable<ManagerMoney.Models.Category>
+﻿@model PaginationResponse<Category>
 
 @{
     ViewData["Title"] = "Categorias";
@@ -7,6 +7,8 @@
 <h1>Categorias</h1>
 <h5>La categoria nos permite indicar en que gastamos nuestro dinero,
     también, de donde provienen nuestros ingresos</h5>
+
+<h2> Cantidad de categorías: @Model.TotalRecords - Cantidad de páginas: @Model.TotalPages</h2>
     
 <a asp-action="Create" class="btn btn-primary mb-3">Crear</a>
 
@@ -19,7 +21,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var category in Model)
+        @foreach (var category in Model.Items)
         {
             <tr>
                 <td>

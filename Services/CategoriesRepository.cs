@@ -12,6 +12,7 @@ public interface ICategoriesRepository
     Task Update(Category category);
     Task Delete(int id);
     Task<IEnumerable<Category>> GetAll(int userId, OperationType operationType);
+    Task<int> Count(int userId);
 }
 
 public class CategoriesRepository: ICategoriesRepository
@@ -32,6 +33,7 @@ public class CategoriesRepository: ICategoriesRepository
                                                         ORDER BY  Name
                                                         OFFSET {pagination.Offset} ROWS FETCH NEXT {pagination.RecordsPerPage} ROWS ONLY"
                                                         , new {userId});
+        
     }
     
     public async Task<IEnumerable<Category>> GetAll(int userId, OperationType operationType)
@@ -62,6 +64,11 @@ public class CategoriesRepository: ICategoriesRepository
                                                               new {id, userId});
     }
 
+    public async Task<int> Count(int userId)
+    {
+        using var connection = new SqlConnection(_secretsOptions.ConnectionString);
+        return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Categories WHERE UserId = @userId", new {userId});
+    }
     public async Task Update(Category category)
     {
         using var connection = new SqlConnection(_secretsOptions.ConnectionString);

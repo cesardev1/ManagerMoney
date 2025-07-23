@@ -20,7 +20,17 @@ public class CategoryController : Controller
     {
         var userId = _userServices.GetUserId();
         var categories = await _categoriesRepository.GetAll(userId,pagination);
-        return View(categories);
+        var totalCategories = await _categoriesRepository.Count(userId);
+        var response = new PaginationResponse<Category>
+        {
+            Items = categories,
+            PageIndex = pagination.PageIndex,
+            RecordsPerPage = pagination.RecordsPerPage,
+            TotalRecords = totalCategories,
+            BaseURL = "/Category"
+        };
+        
+        return View(response);
     }
 
     public IActionResult Create()
