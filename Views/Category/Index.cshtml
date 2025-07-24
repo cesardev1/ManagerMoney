@@ -7,31 +7,51 @@
 <h1>Categorías</h1>
 <h5>La categoría nos permite indicar en que gastamos nuestro dinero,
     también, de donde provienen nuestros ingresos</h5>
-
-<h2> Cantidad de categorías: @Model.TotalRecords - Cantidad de páginas: @Model.TotalPages</h2>
     
 <a asp-action="Create" class="btn btn-primary mb-3">Crear</a>
+
+<div class="row">
+    <label>Cantidad de registros a mostrar:</label>
+    <div class="mb-3 col-auto">
+        <select asp-for="@Model.RecordsPerPage" id="recordsPerPage" class="form-select">
+            <option>3</option>
+            <option>10</option>
+            <option>25</option>
+        </select>
+    </div>
+</div>
+
 <partial name="_pagination"/>
 
 <table class="table">
     <thead>
-        <tr>
-            <th>Acciones</th>
-            <th>Nombre</th>
-            <th>Tipo</th>
-        </tr>
+    <tr>
+        <th>Acciones</th>
+        <th>Nombre</th>
+        <th>Tipo</th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (var category in Model.Items)
-        {
-            <tr>
-                <td>
-                    <a class="btn btn-primary" asp-action="Edit" asp-route-id="@category.Id">Editar</a>
-                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@category.Id">Borrar</a>
-                </td>
-                <td> @category.Name </td>
-                <td> @category.OperationTypeId.ToString() </td>
-            </tr>
-        }
+    @foreach (var category in Model.Items)
+    {
+        <tr>
+            <td>
+                <a class="btn btn-primary" asp-action="Edit" asp-route-id="@category.Id">Editar</a>
+                <a class="btn btn-danger" asp-action="Delete" asp-route-id="@category.Id">Borrar</a>
+            </td>
+            <td> @category.Name </td>
+            <td> @category.OperationTypeId.ToString() </td>
+        </tr>
+    }
     </tbody>
 </table>
+
+@section Scripts
+{
+    <script>
+        $("#recordsPerPage").change(function () {
+            const recordsPerPage = $(this).val();
+            location.href= `/Category?pageIndex=1&recordsPerPage=${recordsPerPage}`;
+        })
+    </script>
+}

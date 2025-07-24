@@ -27,7 +27,7 @@ public class CategoryController : Controller
             PageIndex = pagination.PageIndex,
             RecordsPerPage = pagination.RecordsPerPage,
             TotalRecords = totalCategories,
-            BaseURL = "/Category"
+            BaseURL = Url.Action()
         };
         
         return View(response);
