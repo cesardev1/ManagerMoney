@@ -165,7 +165,13 @@ public class TransactionController : Controller
     private async Task<IEnumerable<SelectListItem>> GetCategories(int userId, OperationType operationType)
     {
         var categories = await _categoriesRepository.GetAll(userId, operationType);
-        return categories.Select(x => new SelectListItem(x.Name, x.Id.ToString()));
+        var result =  categories.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList();
+
+        var optionDefault = new SelectListItem("-- Seleccione una categoría --", "0", true);
+        result.Insert(0, optionDefault);
+
+        return result;
+
     }
 
     [HttpPost]
