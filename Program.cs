@@ -11,7 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add secrets configuration
 var secrets = builder.Configuration.GetSection("Secrets").Get<SecretsOptions>() ?? new SecretsOptions();
 secrets.ConnectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRING_DEFAULT") ?? secrets.ConnectionString;
-
+secrets.ConfigurationEmail_Email=Environment.GetEnvironmentVariable("CONFIGURATIONEMAIL_EMAIL") ?? secrets.ConfigurationEmail_Email;
+secrets.ConfigurationEmail_Password=Environment.GetEnvironmentVariable("CONFIGURATIONEMAIL_PASSWORD") ?? secrets.ConfigurationEmail_Password;
+secrets.ConfigurationEmail_Host=Environment.GetEnvironmentVariable("CONFIGURATIONEMAIL_HOST") ?? secrets.ConfigurationEmail_Host;
+secrets.ConfigurationEmail_Port = int.TryParse(Environment.GetEnvironmentVariable("CONFIGURATIONEMAIL_PORT"), out int port) 
+    ? port 
+    : secrets.ConfigurationEmail_Port;
 
 // Add services to the container.
 
@@ -34,7 +39,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<IReportService, ReportService>();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddTransient<IUserStore<User>, UserStore>();
-builder.Services.AddIdentityCore<User>().AddErrorDescriber<ErrorMessageIdentity>();
+builder.Services.AddIdentityCore<User>()
+                .AddErrorDescriber<ErrorMessageIdentity>()
+                .AddDefaultTokenProviders();
 builder.Services.AddTransient<SignInManager<User>>();
 builder.Services.AddAuthentication(options =>
 {
@@ -45,6 +52,8 @@ builder.Services.AddAuthentication(options =>
 {
     options.LoginPath = "/user/login";
 });
+builder.Services.AddTransient<IEmailService, EmailService>();
+
 
 var app = builder.Build();
 
