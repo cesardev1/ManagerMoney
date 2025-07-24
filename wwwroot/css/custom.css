@@ -18,9 +18,9 @@
 }
 
 .asset{
-    color: green;
+    color: green !important;
 }
 
 .liability{
-    color: red;
+    color: red !important;
 }

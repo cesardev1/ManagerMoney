@@ -4,6 +4,7 @@ using AutoMapper;
 using ClosedXML.Excel;
 using ManagerMoney.Models;
 using ManagerMoney.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -176,7 +177,7 @@ public class TransactionController : Controller
     }
     
     // Reports section: the "Index" refers to the daily report
-
+    [Authorize]
     public async Task<IActionResult> Index(int month, int year)
     {
         var userId = _userServices.GetUserId();
@@ -388,5 +389,41 @@ public class TransactionController : Controller
     public IActionResult Calendar()
     {
         return View();
+    }
+
+    public async Task<JsonResult> GetCalendarTransactions(DateTime start, DateTime end)
+    {
+        var userId = _userServices.GetUserId();
+        
+        var transactions = await _transactionRepository.GetAllByUserId(new TransactionByUserQueryParameters
+        {
+            UserId = userId,
+            StartDate = start,
+            EndDate = end
+        });
+
+        var calendarEvents = transactions.Select(t => new CalendarEventDto()
+        {
+            Title = t.Amount.ToString("N"),
+            Start = t.TransactionDate.ToString("yyyy-MM-dd"),
+            End = t.TransactionDate.ToString("yyyy-MM-dd"),
+            Color = (t.OperationTypeId == OperationType.Gasto) ? "Red" : null
+        });
+
+        return Json(calendarEvents);
+    }
+
+    public async Task<JsonResult> GetTransactionsPerDate(DateTime date)
+    {
+        var userId = _userServices.GetUserId();
+        
+        var transactions = await _transactionRepository.GetAllByUserId(new TransactionByUserQueryParameters
+        {
+            UserId = userId,
+            StartDate = date,
+            EndDate = date
+        });
+        
+        return Json(transactions);
     }
 }

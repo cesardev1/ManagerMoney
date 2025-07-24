@@ -16,11 +16,21 @@ public class CategoryController : Controller
         _userServices = userServices;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(PaginationVM pagination)
     {
         var userId = _userServices.GetUserId();
-        var categories = await _categoriesRepository.GetAll(userId);
-        return View(categories);
+        var categories = await _categoriesRepository.GetAll(userId,pagination);
+        var totalCategories = await _categoriesRepository.Count(userId);
+        var response = new PaginationResponse<Category>
+        {
+            Items = categories,
+            PageIndex = pagination.PageIndex,
+            RecordsPerPage = pagination.RecordsPerPage,
+            TotalRecords = totalCategories,
+            BaseURL = Url.Action()
+        };
+        
+        return View(response);
     }
 
     public IActionResult Create()

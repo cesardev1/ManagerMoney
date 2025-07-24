@@ -1,0 +1,44 @@
+@model PaginationResponse
+
+@{
+        var linkTemplate = string.Concat(Model.BaseURL, "?pageIndex={0}&recordsPerPage={1}");
+        var activeBtnPrevious = Model.PageIndex > 1;
+        var activeBtnNext = Model.PageIndex < Model.TotalPages;
+}
+
+<nav>
+        <ul class="pagination">
+                <li class="page-item @(activeBtnPrevious? null: "disabled")">
+                        @if (activeBtnPrevious)
+                        {
+                                <a class="page-link" href="@string.Format(linkTemplate, Model.PageIndex - 1, Model.RecordsPerPage)">
+                                        Anterior
+                                </a>
+                        }
+                        else
+                        {
+                                <span class="page-link">Anterior</span>
+                        }
+                </li>
+                @for (var pageIndex = 1; pageIndex <= Model.TotalPages; pageIndex++)
+                {
+                        <li class="page-item @(pageIndex == Model.PageIndex ? "active" : null)">
+                                <a class="page-link" href="@string.Format(linkTemplate, pageIndex, Model.RecordsPerPage)">
+                                        @pageIndex
+                                </a>
+                        </li>
+                }
+                <li class="page-item @(activeBtnNext? null: "disabled")">
+                        @if (activeBtnNext)
+                        {
+                                <a class="page-link" href="@string.Format(linkTemplate, Model.PageIndex + 1, Model.RecordsPerPage)">
+                                        Siguiente
+                                </a>
+                        }
+                        else
+                        {
+                                <span class="page-link">Siguiente</span>
+                        }
+                </li>
+        </ul>
+</nav>
