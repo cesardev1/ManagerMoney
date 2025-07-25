@@ -48,9 +48,10 @@ public class UserStore: IUserStore<User>, IUserEmailStore<User>, IUserPasswordSt
         return IdentityResult.Success;
     }
 
-    public Task<IdentityResult> UpdateAsync(User user, CancellationToken cancellationToken)
+    public async Task<IdentityResult> UpdateAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await _usersRepository.Update(user);
+        return IdentityResult.Success;
     }
 
     public Task<IdentityResult> DeleteAsync(User user, CancellationToken cancellationToken)

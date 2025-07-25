@@ -31,11 +31,20 @@ namespace ManagerMoney.Services
             using var connection = new SqlConnection(_secretsOptions.ConnectionString);
             return await connection.QuerySingleOrDefaultAsync<User>("SELECT * FROM Users WHERE NormalizedEmail = @NormalizedEmail",new { normalizedEmail });
         }
+        
+        public async Task Update(User user)
+        {
+            using var connection = new SqlConnection(_secretsOptions.ConnectionString);
+            await connection.ExecuteAsync(@"UPDATE Users
+                                            SET PasswordHash= @passwordHash
+                                            WHERE Id = @Id",user);
+        }
     }
 
     public interface IUsersRepository
     {
         Task<int> CreateUser(User user);
         Task<User> GetUserByEmail(string normalizedEmail);
+        Task Update(User user);
     }
 }
